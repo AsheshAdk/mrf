@@ -1,0 +1,15 @@
+SPARK: 
+  EXECUTOR:
+    CORES: 1
+    INSTANCES: 1
+    MEMORY: 2g
+  DRIVER:
+    MEMORY: 4g
+  
+
+POSTGRES: 
+  PORT: 5432
+  DATABASE: 'postgres'
+  HOST: 'localhost'
+  USER: 'postgres'
+  PASSWORD: 'Ashesh@123'
