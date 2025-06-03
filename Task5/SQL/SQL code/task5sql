@@ -1,0 +1,94 @@
+-- Create school table
+CREATE TABLE school (
+    school_id SERIAL PRIMARY KEY,
+    school_name VARCHAR(100) NOT NULL,
+    city VARCHAR(50) NOT NULL,
+    established_year INTEGER CHECK (established_year > 1900)
+);
+
+-- Create teacher table
+CREATE TABLE teacher (
+    teacher_id SERIAL PRIMARY KEY,
+    school_id INTEGER REFERENCES school(school_id),
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    department VARCHAR(50) NOT NULL,
+    salary NUMERIC(10, 2) CHECK (salary >= 0),
+    hire_date DATE
+);
+
+-- Create student table
+CREATE TABLE student (
+    student_id SERIAL PRIMARY KEY,
+    school_id INTEGER REFERENCES school(school_id),
+    teacher_id INTEGER REFERENCES teacher(teacher_id),
+    first_name VARCHAR(50) NOT NULL,
+    last_name VARCHAR(50) NOT NULL,
+    grade INTEGER CHECK (grade >= 1 AND grade <= 12),
+    enrollment_date DATE
+);
+
+-- Insert 5 schools
+INSERT INTO school (school_name, city, established_year) VALUES
+('Maplewood High', 'Springfield', 1995),
+('Riverside Academy', 'Rivertown', 1988),
+('Sunnyvale School', 'Sunnyvale', 2002),
+('Oakridge High', 'Greenville', 1990),
+('Hilltop Institute', 'Lakeside', 1975);
+
+-- Insert 20 teachers
+INSERT INTO teacher (school_id, first_name, last_name, department, salary, hire_date) VALUES
+(1, 'John', 'Smith', 'Mathematics', 55000.00, '2018-08-15'),
+(1, 'Emma', 'Johnson', 'English', 52000.00, '2019-09-01'),
+(1, 'Michael', 'Brown', 'Science', 58000.00, '2017-03-10'),
+(1, 'Sarah', 'Davis', 'History', 50000.00, '2020-01-15'),
+(2, 'Lisa', 'Wilson', 'Mathematics', 56000.00, '2016-07-20'),
+(2, 'David', 'Clark', 'English', 53000.00, '2018-09-05'),
+(2, 'Anna', 'Martinez', 'Science', 59000.00, '2015-08-01'),
+(2, 'James', 'Lee', 'Physical Education', 51000.00, '2019-02-10'),
+(3, 'Emily', 'Taylor', 'Mathematics', 57000.00, '2017-09-01'),
+(3, 'Robert', 'Anderson', 'English', 54000.00, '2020-08-20'),
+(3, 'Laura', 'Thomas', 'Science', 60000.00, '2016-03-15'),
+(3, 'William', 'Moore', 'Art', 49000.00, '2021-01-10'),
+(4, 'Jennifer', 'White', 'Mathematics', 58000.00, '2018-07-01'),
+(4, 'Thomas', 'Harris', 'History', 52000.00, '2019-09-10'),
+(4, 'Sophie', 'Lewis', 'Science', 61000.00, '2015-08-15'),
+(4, 'Daniel', 'Walker', 'English', 55000.00, '2020-02-01'),
+(5, 'Olivia', 'Hall', 'Mathematics', 59000.00, '2017-08-10'),
+(5, 'Mark', 'Allen', 'Science', 62000.00, '2016-09-01'),
+(5, 'Grace', 'Young', 'English', 54000.00, '2019-03-05'),
+(5, 'Henry', 'King', 'Physical Education', 51000.00, '2020-01-20');
+
+-- Insert 30 students
+INSERT INTO student (school_id, teacher_id, first_name, last_name, grade, enrollment_date) VALUES
+(1, 1, 'Alice', 'Adams', 9, '2023-09-01'),
+(1, 1, 'Bob', 'Baker', 10, '2022-09-01'),
+(1, 2, 'Clara', 'Carter', 11, '2021-09-01'),
+(1, 3, 'Dylan', 'Dixon', 12, '2020-09-01'),
+(1, 4, 'Ella', 'Evans', 9, '2023-09-01'),
+(2, 5, 'Finn', 'Fisher', 10, '2022-09-01'),
+(2, 5, 'Grace', 'Garcia', 11, '2021-09-01'),
+(2, 6, 'Hannah', 'Hill', 9, '2023-09-01'),
+(2, 7, 'Isaac', 'Irwin', 12, '2020-09-01'),
+(2, 8, 'Julia', 'Jones', 10, '2022-09-01'),
+(3, 9, 'Kevin', 'Kelly', 11, '2021-09-01'),
+(3, 9, 'Lily', 'Lopez', 9, '2023-09-01'),
+(3, 10, 'Mason', 'Martin', 10, '2022-09-01'),
+(3, 11, 'Nora', 'Nelson', 12, '2020-09-01'),
+(3, 12, 'Oliver', 'Owens', 9, '2023-09-01'),
+(4, 13, 'Piper', 'Parker', 11, '2021-09-01'),
+(4, 13, 'Quinn', 'Quinn', 10, '2022-09-01'),
+(4, 14, 'Riley', 'Reed', 9, '2023-09-01'),
+(4, 15, 'Sophia', 'Scott', 12, '2020-09-01'),
+(4, 16, 'Tyler', 'Turner', 10, '2022-09-01'),
+(5, 17, 'Uma', 'Underwood', 11, '2021-09-01'),
+(5, 17, 'Violet', 'Vance', 9, '2023-09-01'),
+(5, 18, 'Wyatt', 'Ward', 12, '2020-09-01'),
+(5, 19, 'Xena', 'Xavier', 10, '2022-09-01'),
+(5, 20, 'Yara', 'Young', 11, '2021-09-01'),
+(1, 2, 'Zoe', 'Zimmerman', 9, '2023-09-01'),
+(2, 6, 'Aaron', 'Alvarez', 10, '2022-09-01'),
+(3, 10, 'Bella', 'Brooks', 11, '2021-09-01'),
+(4, 14, 'Caleb', 'Cole', 12, '2020-09-01'),
+(5, 18, 'Daisy', 'Dean', 9, '2023-09-01');
+select * from school

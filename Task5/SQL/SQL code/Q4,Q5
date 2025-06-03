@@ -1,0 +1,40 @@
+--Q.4) Create a function to calculate a student’s seniority (years since enrollment)
+--and use it to list students with their seniority.
+--(function)
+CREATE OR REPLACE FUNCTION get_seniority(enroll_date DATE)
+RETURNS INTEGER AS $$
+BEGIN
+    RETURN DATE_PART('year', AGE(CURRENT_DATE, enroll_date));
+END;
+$$ LANGUAGE plpgsql;
+
+--(Querry)
+SELECT 
+    s.first_name || ' ' || s.last_name AS student_name,
+    s.enrollment_date,
+    get_seniority(s.enrollment_date) || ' years' AS seniority
+FROM 
+    student s
+ORDER BY 
+    get_seniority(s.enrollment_date) DESC;
+
+
+
+--Q.5) Rank students within each school based on their grade
+--(highest grade gets rank 1), and display the school name,
+--student name (full_name), grade, and rank.
+
+SELECT 
+    s.school_name,
+    CONCAT(st.first_name, ' ', st.last_name) AS full_name,
+    st.grade,
+    RANK() OVER (
+        PARTITION BY s.school_id
+        ORDER BY st.grade DESC
+    ) AS grade_rank
+FROM 
+    student st
+JOIN 
+    school s ON st.school_id = s.school_id
+ORDER BY 
+    s.school_name, grade_rank;

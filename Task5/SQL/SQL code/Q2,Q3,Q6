@@ -1,0 +1,54 @@
+--Q.2) Calculate the average salary of teachers
+--in each department across all schools, displaying only
+--departments with an average salary above $55,000.
+
+SELECT 
+    department,
+    ROUND(AVG(salary), 2) AS avg_salary
+FROM 
+    teacher
+GROUP BY 
+    department
+HAVING 
+    AVG(salary) > 55000
+ORDER BY 
+    avg_salary DESC;
+
+
+--Q.3) Rank teachers within each school based on
+--their salary (highest salary gets rank 1),
+--displaying the teacher’s name, school name, salary, and rank.
+
+SELECT 
+    CONCAT(t.first_name, ' ', t.last_name) AS teacher_name,
+    s.school_name,
+    t.salary,
+    RANK() OVER (
+        PARTITION BY s.school_id
+        ORDER BY t.salary DESC
+    ) AS salary_rank
+FROM 
+    teacher t
+JOIN 
+    school s ON t.school_id = s.school_id
+ORDER BY 
+    s.school_name, salary_rank;
+
+--Q.6) Calculate the cumulative salary of teachers within each school,
+--ordered by hire date (earliest hired first), and display the school
+--name, teacher name, hire date, salary, and cumulative salary.
+
+SELECT 
+    s.school_name,
+    CONCAT(t.first_name, ' ', t.last_name) AS teacher_name,
+    t.hire_date,
+    t.salary,
+    SUM(t.salary) OVER (
+        PARTITION BY s.school_id
+    ) AS cumulative_salary
+FROM 
+    teacher t
+JOIN 
+    school s ON t.school_id = s.school_id
+ORDER BY 
+    t.hire_date;
