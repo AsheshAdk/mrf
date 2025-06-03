@@ -1,0 +1,14 @@
+1. Write a query to count the number of students in each school and display the school name and the student count, ordered by the count in descending order.
+
+2.Calculate the average salary of teachers in each department across all schools, displaying only departments with an average salary above $55,000.
+
+3.Rank teachers within each school based on their salary (highest salary gets rank 1), displaying the teacher’s name, school name, salary, and rank.
+
+4.Create a function to calculate a student’s seniority (years since enrollment) and use it to list students with their seniority.
+
+5.Rank students within each school based on their grade (highest grade gets rank 1), and display the school name, student name (full_name), grade, and rank.
+
+6.Calculate the cumulative salary of teachers within each school, ordered by hire date (earliest hired first), and display the school name, teacher name, hire date, salary, and cumulative salary.
+
+
+7.For each student, display their school name, teacher’s name, student’s name, and the number of students assigned to their teacher. Additionally, rank teachers within each school based on the number of students they have (highest student count gets rank 1).

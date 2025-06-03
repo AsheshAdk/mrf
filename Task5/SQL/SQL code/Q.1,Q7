@@ -1,0 +1,61 @@
+--Q.1) Write a query to count the number of students in each
+--school and display the school name and the student count,
+--ordered by the count in descending order.
+
+SELECT 
+    s.school_name,
+    COUNT(st.student_id) AS student_count
+FROM 
+    school s
+LEFT JOIN 
+    student st ON s.school_id = st.school_id
+GROUP BY 
+    s.school_name
+ORDER BY 
+    student_count DESC;
+
+--Q.7) For each student, display their school name, teacher’s name,
+-- student’s name, and the number of students assigned to their teacher.
+--Additionally, rank teachers within each school based on the number of students they have (highest student count gets rank 1).
+
+WITH teacher_student_count AS (
+    SELECT 
+        t.teacher_id,
+        t.school_id,
+        COUNT(s.student_id) AS student_count
+    FROM 
+        teacher t
+    JOIN 
+        student s ON s.teacher_id = t.teacher_id
+    GROUP BY 
+        t.teacher_id, t.school_id
+),
+ranked_teachers AS (
+    SELECT 
+        teacher_id,
+        school_id,
+        student_count,
+        RANK() OVER (
+            PARTITION BY school_id
+            ORDER BY student_count DESC
+        ) AS teacher_rank
+    FROM teacher_student_count
+)
+SELECT 
+    sch.school_name,
+    CONCAT(t.first_name, ' ', t.last_name) AS teacher_name,
+    CONCAT(s.first_name, ' ', s.last_name) AS student_name,
+    tsc.student_count,
+    rt.teacher_rank
+FROM 
+    student s
+JOIN 
+    teacher t ON s.teacher_id = t.teacher_id
+JOIN 
+    school sch ON s.school_id = sch.school_id
+JOIN 
+    teacher_student_count tsc ON t.teacher_id = tsc.teacher_id
+JOIN 
+    ranked_teachers rt ON t.teacher_id = rt.teacher_id
+ORDER BY 
+    sch.school_name, rt.teacher_rank, teacher_name, student_name;
