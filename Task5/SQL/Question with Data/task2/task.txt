@@ -1,0 +1,60 @@
+1. Objective: Create a PostgreSQL function to compute an episode’s impact score, then use it to analyze series performance, highlighting top episodes and genre trends.
+
+Task Description:
+
+Use the series and episode tables.
+Create a function calculate_impact_score with parameters:
+rating : Episode rating.
+air_date : Episode air date.
+Return a NUMERIC score (rounded to 2 decimals): rating * 5 + months_since_air / 12, where months_since_air is months from air_date to current date. Use COALESCE to return 0 if rating is null.
+
+categorize episodes: ‘High Impact’ if score ≥ 45, ‘Moderate’ if ≥ 40, else ‘Low’.
+Expected output:
+series_name	episode_title	impact_score	episode_category	rank	high_rated_episodes		avg_series_rating
+Breaking Bad	Pilot		46.33		High Impact		1	Pilot, Seven Thirty-Seven	8.5
+
+
+2.Create a PostgreSQL function to evaluate episode longevity, then use it to analyze series episode trends and genre popularity.
+
+Task Description:
+
+Use the series and episode tables.
+Create a function calculate_longevity_score in the public schema with parameters:
+rating : Episode rating.
+season_number : Season number.
+Return a NUMERIC score (rounded to 2 decimals): rating * 3 + season_number * 2. Use COALESCE to return 0 if rating is null.
+In the main query:
+Use the function to compute each episode’s longevity score.
+Use CASE to label episodes: ‘Long-Lasting’ if score ≥ 30, ‘Moderate’ if ≥ 25, else ‘Short-Lived’.
+Use a window function to count episodes per series.
+Use STRING_AGG to list genres of series with episodes aired after 2015 (alphabetically), or ‘None’ if none.
+Display: series name, episode title, longevity score, episode label, episode count, recent genres, total seasons per series.
+Order by series name, longevity score (descending).
+
+Expected Output:
+
+series_name	episode_title	longevity_score	episode_label	episode_count	recent_genres	total_seasons
+Breaking Bad	No Más	        31.50	        Long-Lasting	3		Action, Sci-Fi	3
+
+
+3.Create a PostgreSQL function to assess episode rating consistency, then use it to analyze series performance and episode trends.
+
+Task Description:
+
+Use the series and episode tables.
+Create a function calculate_rating_consistency in the public schema with parameters:
+rating : Episode rating.
+series_avg_rating : Average rating of the series.
+Return a NUMERIC absolute score : (rating - series_avg_rating) * 10. Use COALESCE to return 0 if rating or series_avg_rating is null.
+In the main query:
+Use the function to compute each episode’s rating consistency score .
+Use CASE to categorize episodes: ‘Consistent’ if score ≤ 5, ‘Variable’ if ≤ 15, else ‘Highly Variable’.
+Use a window function to rank episodes by rating within each season (descending).
+Use STRING_AGG to list episode titles (alphabetically) aired in the last 10 years (since June 1, 2015), or ‘None’ if none.
+Display: series name, episode title, consistency score, consistency category, season rank, recent episodes, max series rating.
+Order by series name, consistency score.
+
+Expected Output:
+
+series_name	episode_title	consistency_score	consistency_category	season_rank	recent_episodes		max_series_rating
+Breaking Bad	Seven 		Thirty-Seven		1.00			Consistent	1			8.7
