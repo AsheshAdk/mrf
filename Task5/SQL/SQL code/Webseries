@@ -94,8 +94,8 @@ ORDER BY r.series_name, r.rank;
 --Display: series name, episode title, longevity score, episode label, episode count, recent genres, total seasons per series.
 --Order by series name, longevity score (descending).
 --Expected Output:
---series_name	episode_title	longevity_score	episode_label	episode_count	recent_genres	total_seasons
---Breaking Bad	No Más	        31.50	        Long-Lasting	3		Action, Sci-Fi	3
+--series_name	episode_title	longevity_score	 episode_label	episode_count	recent_genres	  total_seasons
+--Breaking Bad	No Más	        31.50	          Long-Lasting	3		         Action, Sci-Fi	    3
 
 
 -- Step 1: Create function
@@ -173,8 +173,8 @@ ORDER BY ls.series_name, ls.longevity_score DESC;
 --Display: series name, episode title, consistency score, consistency category, season rank, recent episodes, max series rating.
 --Order by series name, consistency score.
 --Expected Output:
---series_name	episode_title	consistency_score	consistency_category	season_rank	recent_episodes		max_series_rating
---Breaking Bad	Seven 		Thirty-Seven		1.00			Consistent	1			8.7
+--series_name	episode_title	   consistency_score	consistency_category	season_rank	 recent_episodes		     max_series_rating
+--Breaking Bad	Seven Thirty-Seven		1.00		      Consistent	             1		 as alphabetical order         8.7
 
 
 --(Create the function)
