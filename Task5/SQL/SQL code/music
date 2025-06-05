@@ -1,0 +1,161 @@
+select * from music.music_track;
+--Task 1: Genre Popularity Aggregation
+--Objective: Rank tracks by play count within genres and aggregate popular tracks.
+--Task Description: Without Function
+--Calculate a popularity metric: play_count ÷ 100,000, rounded to 2 decimals. Use 0 for null play_count.
+--Categorize tracks: ‘Hit’ if metric ≥ 15, ‘Known’ if ≥ 10, else ‘Underrated’.
+--Use a window function to rank tracks by play_count within each genre (highest = rank 1).
+--Use STRING_AGG to list track names (alphabetically) with rating ≥ 4.5 per genre, comma-separated, or ‘None’ if none.
+--Show: track name, genre, popularity metric, category, genre rank, high-rated tracks.
+--Order by genre, genre rank.
+--Expected Output:
+--track_name	        genre  	popularity_metric	track_category	genre_rank	     high_rated_tracks
+--Blinding Lights	     Pop	    25.00	            Hit	            1	        Billie Jean, Blinding Lights
+
+WITH Popularity AS (
+    SELECT 
+        track_name,
+        genre,
+        ROUND(COALESCE(play_count, 0) / 100000, 2) AS popularity_metric,
+        CASE 
+            WHEN ROUND(COALESCE(play_count, 0) / 100000, 2) >= 15 THEN 'Hit'
+            WHEN ROUND(COALESCE(play_count, 0) / 100000, 2) >= 10 THEN 'Known'
+            ELSE 'Underrated'
+        END AS track_category,
+        Dense_RANK() OVER (PARTITION BY genre ORDER BY COALESCE(play_count, 0) DESC) AS genre_rank
+    FROM music.music_track
+),
+HighRated AS (
+    SELECT 
+        genre,
+        COALESCE(
+            STRING_AGG(
+                CASE WHEN rating >= 4.5 THEN track_name ELSE NULL END,
+                ', '
+                ORDER BY track_name
+            ),
+            'None'
+        ) AS high_rated_tracks
+    FROM music.music_track
+    GROUP BY genre
+)
+SELECT 
+    p.track_name,
+    p.genre,
+    p.popularity_metric,
+    p.track_category,
+    p.genre_rank,
+    h.high_rated_tracks
+FROM Popularity p
+JOIN HighRated h ON p.genre = h.genre
+ORDER BY p.genre, p.genre_rank;
+
+--2. Task Description:
+--Calculate rating deviation: absolute difference between track rating and artist’s average rating, rounded to 2 decimals. Use 0 for null rating.
+--Categorize tracks: ‘Consistent’ if deviation ≤ 0.2, ‘Variable’ if ≤ 0.5, else ‘Diverse’.
+--Use a window function to count tracks per artist.
+--Use STRING_AGG to list track names (alphabetically) with play_count ≥ 1,000,000 per artist, comma-separated, or ‘None’ if none.
+--Show: track name, artist, rating deviation, consistency category, artist track count, high-play tracks.
+--Order by artist, rating deviation.
+--Expected Output:
+--track_name	artist	rating_deviation	consistency_category	artist_track_count	high_play_tracks
+--Lose Yourself	Eminem	 0.10	                   Consistent	           2	                 Lose Yourself
+
+WITH ArtistAvg AS (
+    SELECT 
+        artist,
+        AVG(COALESCE(rating, 0)) AS avg_rating
+    FROM music.music_track
+    GROUP BY artist
+),
+TrackStats AS (
+    SELECT 
+        t.track_name,
+        t.artist,
+        ROUND(ABS(COALESCE(t.rating, 0) - a.avg_rating), 2) AS rating_deviation,
+        CASE 
+            WHEN ROUND(ABS(COALESCE(t.rating, 0) - a.avg_rating), 2) <= 0.2 THEN 'Consistent'
+            WHEN ROUND(ABS(COALESCE(t.rating, 0) - a.avg_rating), 2) <= 0.5 THEN 'Variable'
+            ELSE 'Diverse'
+        END AS consistency_category,
+        COUNT(*) OVER (PARTITION BY t.artist) AS artist_track_count
+    FROM music.music_track t
+    JOIN ArtistAvg a ON t.artist = a.artist
+),
+HighPlay AS (
+    SELECT 
+        artist,
+        COALESCE(
+            STRING_AGG(
+                CASE WHEN play_count >= 1000000 THEN track_name ELSE NULL END,
+                ', '
+                ORDER BY track_name
+            ),
+            'None'
+        ) AS high_play_tracks
+    FROM music.music_track
+    GROUP BY artist
+)
+SELECT 
+    ts.track_name,
+    ts.artist,
+    ts.rating_deviation,
+    ts.consistency_category,
+    ts.artist_track_count,
+    hp.high_play_tracks
+FROM TrackStats ts
+JOIN HighPlay hp ON ts.artist = hp.artist
+ORDER BY ts.artist, ts.rating_deviation;
+
+--3: Recent Track Performance
+--Objective: Rank recent tracks by rating and aggregate short tracks by genre.
+--Task Description:
+--For tracks released after 2000, calculate a performance score: rating + (play_count ÷ 500,000), rounded to 2 decimals. Use 0 for null rating or play_count.
+--Categorize tracks: ‘Standout’ if score ≥ 8, ‘Notable’ if ≥ 6, else ‘Average’.
+--Use a window function to rank tracks by performance score within genre (highest = rank 1).
+--Use STRING_AGG to list track names (alphabetically) with duration_seconds ≤ 250 per genre, comma-separated, or ‘None’ if none.
+--Show: track name, genre, performance score, performance category, genre rank, short tracks.
+--Order by performance score (descending).
+--Expected Output:
+--track_name	    genre	performance_score	performance_category	genre_rank	short_tracks
+--Blinding Lights	     Pop	    9.40	            Standout	            1	        Blinding Lights, Shape of You
+
+WITH RecentTracks AS (
+    SELECT 
+        track_name,
+        genre,
+        ROUND(COALESCE(rating, 0) + COALESCE(play_count, 0) / 500000, 2) AS performance_score,
+        CASE 
+            WHEN ROUND(COALESCE(rating, 0) + COALESCE(play_count, 0) / 500000, 2) >= 8 THEN 'Standout'
+            WHEN ROUND(COALESCE(rating, 0) + COALESCE(play_count, 0) / 500000, 2) >= 6 THEN 'Notable'
+            ELSE 'Average'
+        END AS performance_category,
+        RANK() OVER (PARTITION BY genre ORDER BY ROUND(COALESCE(rating, 0) + COALESCE(play_count, 0) / 500000, 2) DESC) AS genre_rank
+    FROM music.music_track
+    WHERE release_date > '2000-01-01'
+),
+ShortTracks AS (
+    SELECT 
+        genre,
+        COALESCE(
+            STRING_AGG(
+                CASE WHEN duration_seconds <= 250 THEN track_name ELSE NULL END,
+                ', '
+                ORDER BY track_name
+            ),
+            'None'
+        ) AS short_tracks
+    FROM music.music_track
+    WHERE release_date > '2000-01-01'
+    GROUP BY genre
+)
+SELECT 
+    rt.track_name,
+    rt.genre,
+    rt.performance_score,
+    rt.performance_category,
+    rt.genre_rank,
+    st.short_tracks
+FROM RecentTracks rt
+JOIN ShortTracks st ON rt.genre = st.genre
+ORDER BY rt.performance_score DESC;
