@@ -1,0 +1,79 @@
+CREATE TABLE music.music_track (
+    track_id SERIAL PRIMARY KEY,
+    track_name VARCHAR(100) NOT NULL,
+    artist VARCHAR(100) NOT NULL,
+    genre VARCHAR(50) CHECK (genre IN ('Pop', 'Rock', 'Jazz', 'Hip-Hop', 'Classical')),
+    release_date DATE,
+    duration_seconds INTEGER CHECK (duration_seconds > 0),
+    play_count INTEGER CHECK (play_count >= 0),
+    rating NUMERIC(3, 1) CHECK (rating >= 0 AND rating <= 5)
+);
+
+INSERT INTO music.music_track (track_name, artist, genre, release_date, duration_seconds, play_count, rating) VALUES
+('Bohemian Rhapsody', 'Queen', 'Rock', '1975-10-31', 354, 1500000, 4.8),
+('Shape of You', 'Ed Sheeran', 'Pop', '2017-01-06', 233, 2000000, 4.2),
+('Billie Jean', 'Michael Jackson', 'Pop', '1983-01-02', 294, 1200000, 4.5),
+('Take Five', 'Dave Brubeck', 'Jazz', '1959-09-29', 324, 300000, 4.0),
+('Lose Yourself', 'Eminem', 'Hip-Hop', '2002-10-28', 326, 1800000, 4.7),
+('Moonlight Sonata', 'Beethoven', 'Classical', '1801-01-01', 360, 200000, 4.3),
+('Sweet Child O''Mine', 'Guns N'' Roses', 'Rock', '1987-07-21', 356, 1100000, 4.6),
+('Blinding Lights', 'The Weeknd', 'Pop', '2019-11-29', 200, 2500000, 4.4),
+('Kind of Blue', 'Miles Davis', 'Jazz', NULL, 274, 250000, 4.1),
+('Stan', 'Eminem', 'Hip-Hop', '2000-11-21', 405, 900000, 4.5);
+Tasks for Interns
+Below are three short, tricky tasks emphasizing STRING_AGG and window functions using the music_track table.
+
+Task 1: Genre Popularity Aggregation
+Objective: Rank tracks by play count within genres and aggregate popular tracks.
+
+Task Description: Without Function
+
+Calculate a popularity metric: play_count ÷ 100,000, rounded to 2 decimals. Use 0 for null play_count.
+Categorize tracks: ‘Hit’ if metric ≥ 15, ‘Known’ if ≥ 10, else ‘Underrated’.
+Use a window function to rank tracks by play_count within each genre (highest = rank 1).
+Use STRING_AGG to list track names (alphabetically) with rating ≥ 4.5 per genre, comma-separated, or ‘None’ if none.
+Show: track name, genre, popularity metric, category, genre rank, high-rated tracks.
+Order by genre, genre rank.
+Expected Output:
+
+
+track_name	    genre	popularity_metric	track_category	genre_rank	high_rated_tracks
+Blinding Lights	     Pop	    25.00	            Hit	            1	        Billie Jean, Blinding Lights
+...	...	...	...	...	...
+
+
+2. Task Description:
+
+Calculate rating deviation: absolute difference between track rating and artist’s average rating, rounded to 2 decimals. Use 0 for null rating.
+Categorize tracks: ‘Consistent’ if deviation ≤ 0.2, ‘Variable’ if ≤ 0.5, else ‘Diverse’.
+Use a window function to count tracks per artist.
+Use STRING_AGG to list track names (alphabetically) with play_count ≥ 1,000,000 per artist, comma-separated, or ‘None’ if none.
+Show: track name, artist, rating deviation, consistency category, artist track count, high-play tracks.
+Order by artist, rating deviation.
+Expected Output:
+
+
+track_name	artist	rating_deviation	consistency_category	artist_track_count	high_play_tracks
+Lose Yourself	Eminem	 0.10	                   Consistent	           2	                 Lose Yourself
+...	...	...	...	...	...
+
+
+3: Recent Track Performance
+Objective: Rank recent tracks by rating and aggregate short tracks by genre.
+
+Task Description:
+
+For tracks released after 2000, calculate a performance score: rating + (play_count ÷ 500,000), rounded to 2 decimals. Use 0 for null rating or play_count.
+Categorize tracks: ‘Standout’ if score ≥ 8, ‘Notable’ if ≥ 6, else ‘Average’.
+Use a window function to rank tracks by performance score within genre (highest = rank 1).
+Use STRING_AGG to list track names (alphabetically) with duration_seconds ≤ 250 per genre, comma-separated, or ‘None’ if none.
+Show: track name, genre, performance score, performance category, genre rank, short tracks.
+Order by performance score (descending).
+Expected Output:
+
+
+track_name	    genre	performance_score	performance_category	genre_rank	short_tracks
+Blinding Lights	     Pop	    9.40	            Standout	            1	        Blinding Lights, Shape of You
+...	...	...	...	...	...
+
+
